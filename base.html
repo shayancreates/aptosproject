@@ -1,0 +1,2296 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tracely - Blockchain Supply Chain Optimization</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ScrollMagic/2.0.8/ScrollMagic.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ScrollMagic/2.0.8/plugins/animation.gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
+    <style>
+        :root {
+            --primary: #10b981;
+            --primary-dark: #059669;
+            --secondary: #3b82f6;
+            --dark: #1e293b;
+            --light: #f8fafc;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .nav-glass {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .card-3d {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            transform-style: preserve-3d;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            overflow: hidden;
+        }
+
+        .card-3d:hover {
+            transform: translateY(-10px) rotateX(5deg) rotateY(5deg);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-3d::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
+            z-index: -1;
+            transform: translateZ(-20px);
+        }
+
+        .feature-icon {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .carousel-container {
+            perspective: 1000px;
+        }
+
+        .carousel-track {
+            transform-style: preserve-3d;
+            transition: transform 1s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+
+        .carousel-card {
+            transform-origin: center center;
+            transition: all 0.8s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+
+        .particle-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .floating {
+            animation: floating 6s ease-in-out infinite;
+        }
+
+        @keyframes floating {
+            0% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+
+            100% {
+                transform: translateY(0px);
+            }
+        }
+
+        .pulse {
+            animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .glow {
+            filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.6));
+        }
+
+        .blockchain-node {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #10b981;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #10b981;
+        }
+
+        .blockchain-connection {
+            position: absolute;
+            height: 2px;
+            background: rgba(16, 185, 129, 0.3);
+            transform-origin: left center;
+        }
+
+        .route-path {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: dash 5s linear forwards infinite;
+        }
+
+        @keyframes dash {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .input-glass {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .input-glass:focus {
+            outline: none;
+            border-color: #10b981;
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+        }
+
+        .blockchain-vis {
+            width: 100%;
+            height: 400px;
+            position: relative;
+            overflow: hidden;
+            border-radius: 16px;
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .stats-card {
+            transition: all 0.3s ease;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .block-animate {
+            animation: blockMined 0.5s ease-out;
+        }
+
+        @keyframes blockMined {
+            0% {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .transaction-item {
+            transition: all 0.3s ease;
+        }
+
+        .transaction-item:hover {
+            background: rgba(16, 185, 129, 0.05);
+            transform: translateX(5px);
+        }
+
+        /* 3D Ship Animation Styles */
+        .ship-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+            background: linear-gradient(to bottom, #e0f2fe 0%, #bae6fd 100%);
+            border-radius: 12px;
+            overflow: hidden;
+            perspective: 1000px;
+        }
+
+        .ocean {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 30%;
+            background: linear-gradient(to bottom, #0ea5e9 0%, #0369a1 100%);
+        }
+
+        .wave {
+            position: absolute;
+            bottom: 30%;
+            width: 200%;
+            height: 100px;
+            background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1200 120" xmlns="http://www.w3.org/2000/svg"><path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" opacity=".25" fill="%230ea5e9"/><path d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z" opacity=".5" fill="%230ea5e9"/><path d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z" fill="%230ea5e9"/></svg>');
+            background-repeat: repeat-x;
+            animation: wave 10s linear infinite;
+            transform: translate3d(0, 0, 0);
+        }
+
+        @keyframes wave {
+            0% {
+                transform: translateX(0) translateZ(0);
+            }
+
+            100% {
+                transform: translateX(-50%) translateZ(0);
+            }
+        }
+
+        .blockchain-ship {
+            position: absolute;
+            bottom: 18%;
+            left: -200px;
+            width: 200px;
+            height: 80px;
+            animation: shipMove 20s linear infinite;
+            transform-style: preserve-3d;
+        }
+
+        @keyframes shipMove {
+            0% {
+                transform: translateX(-100px) translateZ(0);
+            }
+
+            100% {
+                transform: translateX(calc(100vw + 100px)) translateZ(0);
+            }
+        }
+
+        .ship-hull {
+            position: absolute;
+            bottom: 0;
+            width: 150px;
+            height: 40px;
+            background: #1e293b;
+            border-radius: 10px 10px 0 0;
+            transform: translateZ(20px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .ship-bridge {
+            position: absolute;
+            bottom: 40px;
+            left: 100px;
+            width: 30px;
+            height: 30px;
+            background: #334155;
+            transform: translateZ(30px);
+        }
+
+        .ship-smokestack {
+            position: absolute;
+            bottom: 50px;
+            left: 110px;
+            width: 10px;
+            height: 20px;
+            background: #1e293b;
+            transform: translateZ(25px);
+        }
+
+        .smoke {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            width: 15px;
+            height: 15px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            filter: blur(3px);
+            animation: smokeRise 3s linear infinite;
+            transform: translateX(-50%) translateZ(0);
+        }
+
+        @keyframes smokeRise {
+            0% {
+                transform: translateX(-50%) translateY(0) scale(0.5) translateZ(0);
+                opacity: 0;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+
+            100% {
+                transform: translateX(-50%) translateY(-50px) scale(1.5) translateZ(0);
+                opacity: 0;
+            }
+        }
+
+        .cargo-containers {
+            position: absolute;
+            bottom: 40px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            transform-style: preserve-3d;
+        }
+
+        .container {
+            width: 30px;
+            height: 40px;
+            background: var(--color);
+            position: relative;
+            transform: translateZ(calc(var(--i) * 5px));
+            animation: containerBounce 1s ease-in-out infinite alternate;
+            animation-delay: calc(var(--i) * 0.1s);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 8px;
+            font-weight: bold;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        @keyframes containerBounce {
+            0% {
+                transform: translateZ(calc(var(--i) * 5px)) translateY(0);
+            }
+
+            100% {
+                transform: translateZ(calc(var(--i) * 5px)) translateY(-5px);
+            }
+        }
+
+        .blockchain-hash {
+            transform: rotate(90deg);
+            white-space: nowrap;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Location markers */
+        .location-marker {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .location-label {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(5px);
+        }
+
+        .blockchain-node {
+            width: 20px;
+            height: 20px;
+            background: #10b981;
+            border-radius: 50%;
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+                transform: scale(1);
+            }
+
+            70% {
+                box-shadow: 0 0 0 15px rgba(16, 185, 129, 0);
+                transform: scale(1.1);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+                transform: scale(1);
+            }
+        }
+
+        /* Blockchain connection */
+        .blockchain-connection {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: repeating-linear-gradient(to right, #3b82f6 0%, #3b82f6 50%, transparent 50%, transparent 100%);
+            background-size: 20px 2px;
+            z-index: 5;
+            transform: translateY(-50%);
+            animation: connectionFlow 1s linear infinite;
+        }
+
+        @keyframes connectionFlow {
+            0% {
+                background-position: 0 0;
+            }
+
+            100% {
+                background-position: 20px 0;
+            }
+        }
+
+        /* Floating blockchain particles */
+        .blockchain-particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            filter: blur(1px);
+            animation: floatParticle 15s linear infinite;
+            opacity: 0.7;
+        }
+
+        @keyframes floatParticle {
+            0% {
+                transform: translateY(0) translateX(0) translateZ(0);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 0.7;
+            }
+
+            90% {
+                opacity: 0.7;
+            }
+
+            100% {
+                transform: translateY(-100px) translateX(50px) translateZ(0);
+                opacity: 0;
+            }
+        }
+
+        .route-option {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .route-option:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .route-option.active {
+            border: 2px solid #10b981;
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .blockchain-block {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .blockchain-block:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        /* New 3D Elements */
+        .blockchain-bot {
+            width: 120px;
+            height: 120px;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: botFloat 4s ease-in-out infinite;
+        }
+
+        @keyframes botFloat {
+
+            0%,
+            100% {
+                transform: translateY(0) rotateY(0);
+            }
+
+            50% {
+                transform: translateY(-20px) rotateY(10deg);
+            }
+        }
+
+        .bot-head {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: #3b82f6;
+            border-radius: 50%;
+            top: 0;
+            left: 30px;
+            transform: translateZ(30px);
+            box-shadow: inset 0 -10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .bot-eye {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: white;
+            border-radius: 50%;
+            top: 20px;
+        }
+
+        .bot-eye.left {
+            left: 15px;
+        }
+
+        .bot-eye.right {
+            right: 15px;
+        }
+
+        .bot-body {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: #10b981;
+            top: 40px;
+            left: 20px;
+            border-radius: 15px;
+            transform: translateZ(20px);
+            box-shadow: inset 0 -10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .bot-arm {
+            position: absolute;
+            width: 15px;
+            height: 50px;
+            background: #10b981;
+            top: 45px;
+            border-radius: 10px;
+        }
+
+        .bot-arm.left {
+            left: 5px;
+            transform: rotateZ(-20deg) translateZ(10px);
+        }
+
+        .bot-arm.right {
+            right: 5px;
+            transform: rotateZ(20deg) translateZ(10px);
+        }
+
+        .bot-leg {
+            position: absolute;
+            width: 15px;
+            height: 40px;
+            background: #059669;
+            bottom: 0;
+            border-radius: 8px;
+        }
+
+        .bot-leg.left {
+            left: 30px;
+            transform: translateZ(15px);
+        }
+
+        .bot-leg.right {
+            right: 30px;
+            transform: translateZ(15px);
+        }
+
+        .blockchain-truck {
+            width: 200px;
+            height: 100px;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: truckMove 8s linear infinite;
+        }
+
+        @keyframes truckMove {
+            0% {
+                transform: translateX(-100px) rotateY(0deg);
+            }
+
+            49% {
+                transform: translateX(calc(100vw + 100px)) rotateY(0deg);
+            }
+
+            50% {
+                transform: translateX(calc(100vw + 100px)) rotateY(180deg);
+            }
+
+            99% {
+                transform: translateX(-100px) rotateY(180deg);
+            }
+
+            100% {
+                transform: translateX(-100px) rotateY(0deg);
+            }
+        }
+
+        .truck-cabin {
+            width: 80px;
+            height: 50px;
+            background: #3b82f6;
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            border-radius: 10px 0 0 10px;
+            transform: translateZ(20px);
+        }
+
+        .truck-window {
+            width: 40px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.7);
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            border-radius: 5px;
+        }
+
+        .truck-trailer {
+            width: 120px;
+            height: 60px;
+            background: #10b981;
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            border-radius: 0 10px 10px 0;
+            transform: translateZ(10px);
+        }
+
+        .truck-wheel {
+            width: 25px;
+            height: 25px;
+            background: #1e293b;
+            border-radius: 50%;
+            position: absolute;
+            bottom: -10px;
+            transform: translateZ(5px);
+            animation: wheelSpin 1s linear infinite;
+        }
+
+        @keyframes wheelSpin {
+            from {
+                transform: translateZ(5px) rotate(0deg);
+            }
+
+            to {
+                transform: translateZ(5px) rotate(360deg);
+            }
+        }
+
+        .wheel-front {
+            left: 15px;
+        }
+
+        .wheel-rear {
+            right: 15px;
+        }
+
+        .blockchain-block-3d {
+            width: 80px;
+            height: 80px;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: blockRotate 10s linear infinite;
+        }
+
+        @keyframes blockRotate {
+            from {
+                transform: rotateX(0deg) rotateY(0deg);
+            }
+
+            to {
+                transform: rotateX(360deg) rotateY(360deg);
+            }
+        }
+
+        .block-face {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: rgba(16, 185, 129, 0.8);
+            border: 2px solid #059669;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .block-front {
+            transform: rotateY(0deg) translateZ(40px);
+        }
+
+        .block-back {
+            transform: rotateY(180deg) translateZ(40px);
+        }
+
+        .block-right {
+            transform: rotateY(90deg) translateZ(40px);
+        }
+
+        .block-left {
+            transform: rotateY(-90deg) translateZ(40px);
+        }
+
+        .block-top {
+            transform: rotateX(90deg) translateZ(40px);
+        }
+
+        .block-bottom {
+            transform: rotateX(-90deg) translateZ(40px);
+        }
+
+        .crypto-miner {
+            width: 100px;
+            height: 100px;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: minerDig 3s ease-in-out infinite;
+        }
+
+        @keyframes minerDig {
+
+            0%,
+            100% {
+                transform: translateY(0) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-10px) rotate(5deg);
+            }
+        }
+
+        .miner-body {
+            width: 70px;
+            height: 70px;
+            background: #1e293b;
+            position: absolute;
+            bottom: 0;
+            left: 15px;
+            border-radius: 10px;
+            transform: translateZ(20px);
+        }
+
+        .miner-light {
+            width: 15px;
+            height: 15px;
+            background: #f59e0b;
+            border-radius: 50%;
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            box-shadow: 0 0 10px #f59e0b;
+            animation: lightFlicker 2s ease-in-out infinite;
+        }
+
+        @keyframes lightFlicker {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        .miner-pick {
+            width: 40px;
+            height: 5px;
+            background: #64748b;
+            position: absolute;
+            top: 30px;
+            right: -20px;
+            transform: rotateZ(45deg) translateZ(10px);
+        }
+
+        .miner-pick::after {
+            content: '';
+            width: 15px;
+            height: 15px;
+            background: #94a3b8;
+            position: absolute;
+            right: -10px;
+            top: -5px;
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+        }
+
+        .supply-chain-vis {
+            width: 100%;
+            height: 400px;
+            position: relative;
+            overflow: hidden;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%);
+        }
+
+        .chain-node {
+            width: 50px;
+            height: 50px;
+            background: #10b981;
+            border-radius: 50%;
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4);
+            transform-style: preserve-3d;
+            animation: nodePulse 2s ease-in-out infinite;
+        }
+
+        @keyframes nodePulse {
+
+            0%,
+            100% {
+                transform: scale(1) translateZ(0);
+            }
+
+            50% {
+                transform: scale(1.1) translateZ(10px);
+            }
+        }
+
+        .chain-link {
+            position: absolute;
+            height: 3px;
+            background: #3b82f6;
+            transform-origin: left center;
+            z-index: -1;
+        }
+    </style>
+</head>
+
+<body class="relative">
+    <!-- 3D Particle Background -->
+    <div id="particle-bg" class="particle-bg"></div>
+
+    <!-- Navigation -->
+    <nav class="nav-glass fixed w-full z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex justify-between items-center h-20">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <a href="/" class="flex items-center">
+                        <svg class="h-8 w-8 text-emerald-500 glow" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                        <span class="ml-2 text-xl font-bold text-gray-800 ">Tracely</span>
+                    </a>
+                </div>
+
+                <!-- Navigation Links -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <!-- <a href="#features"
+                        class="text-gray-600 hover:text-emerald-600 font-medium text-sm transition">Features</a>
+                    <a href="#blockchain"
+                        class="text-gray-600 hover:text-emerald-600 font-medium text-sm transition">Blockchain</a>
+                    <a href="#demo" class="text-gray-600 hover:text-emerald-600 font-medium text-sm transition">Demo</a>
+                    <a href="#contact"
+                        class="text-gray-600 hover:text-emerald-600 font-medium text-sm transition">Contact</a> -->
+                    <!-- <button id="connectWalletBtn"
+                        class="px-4 py-2 rounded-full text-white bg-gradient-to-r from-emerald-500 to-blue-500 hover:from-emerald-600 hover:to-blue-600 transition-all shadow-lg hover:shadow-xl text-sm font-medium">
+                        Connect Wallet
+                    </button> -->
+                </div>
+
+                <!-- Mobile menu button -->
+                <button id="mobileMenuBtn" class="md:hidden text-gray-600">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile menu -->
+        <div id="mobileMenu" class="hidden md:hidden bg-white px-6 py-4 border-t">
+            <div class="flex flex-col space-y-4">
+                <a href="#features" class="text-gray-600 hover:text-emerald-600 font-medium">Features</a>
+                <a href="#blockchain" class="text-gray-600 hover:text-emerald-600 font-medium">Blockchain</a>
+                <a href="#demo" class="text-gray-600 hover:text-emerald-600 font-medium">Demo</a>
+                <a href="#contact" class="text-gray-600 hover:text-emerald-600 font-medium">Contact</a>
+                <button id="connectWalletBtnMobile"
+                    class="px-4 py-2 rounded-full text-white bg-gradient-to-r from-emerald-500 to-blue-500 hover:from-emerald-600 hover:to-blue-600 transition-all shadow-lg hover:shadow-xl text-sm font-medium w-full">
+                    Connect Wallet
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="pt-32 pb-20 px-6 max-w-7xl mx-auto">
+        <div class="flex flex-col md:flex-row items-center">
+            <div class="md:w-1/2 mb-12 md:mb-0">
+                <h1 class="text-5xl font-bold text-gray-800 mb-4 leading-tight">Revolutionizing Supply Chain with <span
+                        class="gradient-text">Blockchain Intelligence</span></h1>
+                <p class="text-xl text-gray-600 mb-8">Tracely combines blockchain transparency with AI-powered route
+                    optimization to transform global supply chains.</p>
+                <div class="flex flex-wrap gap-4">
+                    <a href='http://localhost:3000'><button
+                            class="px-8 py-3 rounded-full text-white bg-gradient-to-r from-emerald-500 to-blue-500 hover:from-emerald-600 hover:to-blue-600 transition-all shadow-lg hover:shadow-xl font-medium">
+                            Get Started
+                        </button></a>
+                    <a href="https://github.com/shayancreates/aptos-hackathon">
+
+
+                        <button
+                            class="px-8 py-3 rounded-full text-emerald-600 bg-white hover:bg-gray-50 transition-all border border-gray-200 font-medium shadow-sm hover:shadow-md">
+                            Live Demo
+                        </button>
+                    </a>
+                    <a href="/visualization.html">
+
+                        <button
+                            class="px-8 py-3 rounded-full text-gray-700 bg-transparent hover:bg-gray-100 transition-all border border-gray-200 font-medium shadow-sm hover:shadow-md flex items-center">
+                            <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Route Visualization
+                        </button>
+                    </a>
+                </div>
+                <div class="mt-8 flex items-center space-x-6">
+                    <div class="flex items-center">
+                        <div class="flex -space-x-2">
+                            <img class="h-10 w-10 rounded-full border-2 border-white"
+                                src="https://randomuser.me/api/portraits/women/12.jpg" alt="">
+                            <img class="h-10 w-10 rounded-full border-2 border-white"
+                                src="https://randomuser.me/api/portraits/men/32.jpg" alt="">
+                            <img class="h-10 w-10 rounded-full border-2 border-white"
+                                src="https://randomuser.me/api/portraits/women/45.jpg" alt="">
+                        </div>
+                        <span class="ml-3 text-sm text-gray-600">Trusted by 500+ companies</span>
+                    </div>
+                    <div class="flex items-center space-x-1">
+                        <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        <span class="text-gray-700 font-medium">4.9</span>
+                        <span class="text-gray-500">(1.2k reviews)</span>
+                    </div>
+                </div>
+            </div>
+            <div class="md:w-1/2 relative">
+                <div class="card-3d p-8 max-w-md mx-auto floating">
+                    <div class="text-center mb-6">
+                        <svg class="h-16 w-16 mx-auto feature-icon" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-center text-gray-800 mb-4">Route Simulation Engine</h3>
+                    <p class="text-gray-600 text-center mb-6">Our AI-powered engine calculates optimal routes
+                        considering cost, time, and emissions.</p>
+                    <div class="bg-gradient-to-r from-emerald-50 to-blue-50 rounded-xl p-4">
+                        <div class="flex justify-between text-sm font-medium text-gray-700">
+                            <span>Route A</span>
+                            <span class="text-emerald-600">Best Option</span>
+                        </div>
+                        <div class="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
+                            <div class="h-full bg-gradient-to-r from-emerald-400 to-blue-400 rounded-full"
+                                style="width: 85%"></div>
+                        </div>
+                        <div class="mt-4 grid grid-cols-3 gap-4 text-center text-xs">
+                            <div>
+                                <div class="font-medium text-gray-500">Cost</div>
+                                <div class="font-bold text-emerald-600">$1,245</div>
+                            </div>
+                            <div>
+                                <div class="font-medium text-gray-500">Time</div>
+                                <div class="font-bold text-blue-600">18h 32m</div>
+                            </div>
+                            <div>
+                                <div class="font-medium text-gray-500">CO₂</div>
+                                <div class="font-bold text-purple-600">324kg</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    class="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-emerald-200 opacity-20 filter blur-3xl">
+                </div>
+                <div class="absolute bottom-0 -left-10 w-32 h-32 rounded-full bg-blue-200 opacity-20 filter blur-3xl">
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 px-6 bg-white">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Key Features</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">Discover how Tracely combines blockchain
+                    transparency with intelligent supply chain optimization</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Feature 1 - Route Simulation -->
+                <div class="card-3d p-8 hover:transform hover:scale-105 transition-all duration-300">
+                    <div class="text-emerald-500 mb-4">
+                        <svg class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Intelligent Route Simulation</h3>
+                    <p class="text-gray-600 mb-4">Calculate multiple route options in parallel with cost, time, and
+                        emissions analysis.</p>
+                    <ul class="space-y-2 text-sm text-gray-600">
+                        <li class="flex items-center">
+                            <svg class="h-4 w-4 text-emerald-500 mr-2" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7" />
+                            </svg>
+                            Real-time traffic adjustments
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="h-4 w-4 text-emerald-500 mr-2" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7" />
+                            </svg>
+                            Multi-criteria optimization
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="h-4 w-4 text-emerald-500 mr-2" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7" />
+                            </svg>
+                            API integration ready
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Feature 2 - Scalable Architecture -->
+                <div class="card-3d p-8 hover:transform hover:scale-105 transition-all duration-300">
+                    <div class="text-blue-500 mb-4">
+                        <svg class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Modular & Scalable</h3>
+                    <p class="text-gray-600 mb-4">Cloud-native architecture designed for global supply chain expansion.
+                    </p>
+                    <ul class="space-y-2 text-sm text-gray-600">
+                        <li class="flex items-center">
+                            <svg class="h-4 w-4 text-blue-500 mr-2" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7" />
+                            </svg>
+                            Microservice-ready backend
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="h-4 w-4 text-blue-500 mr-2" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7" />
+                            </svg>
+                            Blockchain-enabled trust
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="h-4 w-4 text-blue-500 mr-2" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7" />
+                            </svg>
+                            Docker container support
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Feature 3 - Blockchain Integration -->
+                <div class="card-3d p-8 hover:transform hover:scale-105 transition-all duration-300">
+                    <div class="text-purple-500 mb-4">
+                        <svg class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Blockchain Traceability</h3>
+                    <p class="text-gray-600 mb-4">Immutable product journey tracking with Agico blockchain integration.
+                    </p>
+                    <ul class="space-y-2 text-sm text-gray-600">
+                        <li class="flex items-center">
+                            <svg class="h-4 w-4 text-purple-500 mr-2" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7" />
+                            </svg>
+                            Tamper-proof records
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="h-4 w-4 text-purple-500 mr-2" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7" />
+                            </svg>
+                            Smart contract automation
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="h-4 w-4 text-purple-500 mr-2" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7" />
+                            </svg>
+                            Decentralized verification
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Blockchain Visualization -->
+    <section id="blockchain" class="py-20 px-6 bg-gray-50">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Blockchain-Powered Transparency</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">Every product movement is recorded on our immutable
+                    blockchain ledger</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">Real-Time Blockchain Explorer</h3>
+                    <p class="text-gray-600 mb-6">Tracely leverages blockchain technology to create an immutable
+                        record of every product's journey through your supply chain. Our decentralized ledger ensures
+                        data integrity and builds trust across all stakeholders.</p>
+
+                    <div class="space-y-4">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 mt-1">
+                                <svg class="h-5 w-5 text-emerald-500" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-gray-700 font-medium">End-to-end product provenance</p>
+                                <p class="text-gray-500 text-sm">Track every step from manufacturer to consumer</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 mt-1">
+                                <svg class="h-5 w-5 text-emerald-500" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-gray-700 font-medium">Smart contract automation</p>
+                                <p class="text-gray-500 text-sm">Automate payments and compliance checks</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 mt-1">
+                                <svg class="h-5 w-5 text-emerald-500" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-gray-700 font-medium">Decentralized verification</p>
+                                <p class="text-gray-500 text-sm">Independent validation of all transactions</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="blockchain-vis card-3d" id="blockchainVisualization">
+                    <!-- Blockchain nodes and connections will be added here by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="py-16 bg-gradient-to-r from-emerald-500 to-blue-500 text-white">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div
+                    class="stats-card bg-white bg-opacity-10 p-6 rounded-xl text-center backdrop-filter backdrop-blur-sm">
+                    <div class="text-4xl font-bold mb-2" id="transactionsCount">0</div>
+                    <div class="text-sm opacity-80">Blockchain Transactions</div>
+                </div>
+                <div
+                    class="stats-card bg-white bg-opacity-10 p-6 rounded-xl text-center backdrop-filter backdrop-blur-sm">
+                    <div class="text-4xl font-bold mb-2" id="productsTracked">0</div>
+                    <div class="text-sm opacity-80">Products Tracked</div>
+                </div>
+                <div
+                    class="stats-card bg-white bg-opacity-10 p-6 rounded-xl text-center backdrop-filter backdrop-blur-sm">
+                    <div class="text-4xl font-bold mb-2" id="routeOptimized">0</div>
+                    <div class="text-sm opacity-80">Routes Optimized</div>
+                </div>
+                <div
+                    class="stats-card bg-white bg-opacity-10 p-6 rounded-xl text-center backdrop-filter backdrop-blur-sm">
+                    <div class="text-4xl font-bold mb-2" id="co2Saved">0</div>
+                    <div class="text-sm opacity-80">Tons CO₂ Saved</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Live Demo Section -->
+    <section id="demo" class="py-20 px-6 bg-white">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Interactive Supply Chain Demo</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">Experience our platform with this live simulation of
+                    blockchain-tracked product movement</p>
+            </div>
+
+            <!-- Enhanced 3D Supply Chain Visualization -->
+            <div class="supply-chain-vis card-3d mb-12">
+                <div class="blockchain-truck">
+                    <div class="truck-cabin">
+                        <div class="truck-window"></div>
+                    </div>
+                    <div class="truck-trailer">
+                        <div class="blockchain-block-3d" style="position: absolute; top: 10px; left: 20px;">
+                            <div class="block-face block-front">TC-1</div>
+                            <div class="block-face block-back">TC-1</div>
+                            <div class="block-face block-right"></div>
+                            <div class="block-face block-left"></div>
+                            <div class="block-face block-top"></div>
+                            <div class="block-face block-bottom"></div>
+                        </div>
+                    </div>
+                    <div class="truck-wheel wheel-front"></div>
+                    <div class="truck-wheel wheel-rear"></div>
+                </div>
+
+                <div class="chain-node" style="top: 20%; left: 10%;">🌐</div>
+                <div class="chain-node" style="top: 30%; left: 30%;">🏭</div>
+                <div class="chain-node" style="top: 50%; left: 50%;">🚚</div>
+                <div class="chain-node" style="top: 30%; left: 70%;">🏪</div>
+                <div class="chain-node" style="top: 20%; left: 90%;">🏠</div>
+
+                <!-- Links will be added by JavaScript -->
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+
+                <body class="bg-gray-50">
+                    <div class="max-w-6xl mx-auto p-6">
+                        <div class="card-3d bg-white rounded-xl shadow-xl overflow-hidden">
+                            <div class="p-6">
+                                <h2 class="text-2xl font-bold text-gray-800 mb-4">Blockchain Cargo Tracking</h2>
+                                <p class="text-gray-600 mb-6">Track your shipment in real-time with our
+                                    blockchain-powered logistics system</p>
+
+                                <!-- 3D Ship Animation Container -->
+                                <div class="ship-container">
+                                    <!-- Ocean and waves -->
+                                    <div class="ocean">
+                                        <div class="wave"></div>
+                                    </div>
+
+                                    <!-- 3D Blockchain Cargo Ship -->
+                                    <div class="blockchain-ship">
+                                        <div class="ship-hull">
+                                            <div class="cargo-containers">
+                                                <!-- Animated blockchain containers -->
+                                                <div class="container" style="--i:1; --color:#10b981;">
+                                                    <div class="blockchain-hash">#TC-2847</div>
+                                                </div>
+                                                <div class="container" style="--i:2; --color:#3b82f6;">
+                                                    <div class="blockchain-hash">#TC-2848</div>
+                                                </div>
+                                                <div class="container" style="--i:3; --color:#8b5cf6;">
+                                                    <div class="blockchain-hash">#TC-2849</div>
+                                                </div>
+                                                <div class="container" style="--i:4; --color:#ec4899;">
+                                                    <div class="blockchain-hash">#TC-2850</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="ship-bridge"></div>
+                                        <div class="ship-smokestack">
+                                            <div class="smoke"></div>
+                                            <div class="smoke" style="animation-delay: 0.5s;"></div>
+                                            <div class="smoke" style="animation-delay: 1s;"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Location indicators with blockchain icons -->
+                                    <!-- <div class="location-marker" style="top: 30%; left: 20%;">
+                                        <div class="blockchain-node"></div>
+                                        <span class="location-label">Current Location</span>
+                                    </div>
+                                    <div class="location-marker" style="top: 30%; right: 20%;">
+                                        <div class="blockchain-node"></div>
+                                        <span class="location-label">Destination</span>
+                                    </div> -->
+
+                                    <!-- Blockchain connection between locations -->
+                                    <div class="blockchain-connection"></div>
+
+                                    <!-- Floating blockchain particles -->
+                                    <div id="particles-container"></div>
+                                </div>
+
+                                <!-- Shipment details -->
+                                <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div class="bg-gray-50 p-4 rounded-lg">
+                                        <h3 class="font-medium text-gray-700">Shipment ID</h3>
+                                        <p class="text-emerald-600 font-mono">#TC-2847-9382</p>
+                                    </div>
+                                    <div class="bg-gray-50 p-4 rounded-lg">
+                                        <h3 class="font-medium text-gray-700">Current Status</h3>
+                                        <p class="text-blue-600">In Transit</p>
+                                    </div>
+                                    <div class="bg-gray-50 p-4 rounded-lg">
+                                        <h3 class="font-medium text-gray-700">Estimated Arrival</h3>
+                                        <p>Jul 8, 2023 - 14:30</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="card-3d p-6 h-full">
+                            <h3 class="text-xl font-bold text-gray-800 mb-4">Product Journey Details</h3>
+
+                            <div class="mb-6">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm font-medium text-gray-600">Product ID</span>
+                                    <span class="text-sm font-mono font-medium">#TC-2847-9382</span>
+                                </div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm font-medium text-gray-600">Current Status</span>
+                                    <span
+                                        class="text-sm font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded">In
+                                        Transit</span>
+                                </div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm font-medium text-gray-600">Estimated Arrival</span>
+                                    <span class="text-sm font-medium">Jul 8, 2023 - 14:30</span>
+                                </div>
+                            </div>
+
+                            <div class="mb-6">
+                                <h4 class="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-3">Route
+                                    Options
+                                </h4>
+                                <div class="space-y-3">
+                                    <div class="route-option p-3 rounded-lg border border-gray-200 active">
+                                        <div class="flex justify-between items-center">
+                                            <div class="flex items-center">
+                                                <div class="w-3 h-3 rounded-full bg-emerald-500 mr-2"></div>
+                                                <span class="font-medium">Optimal Route</span>
+                                            </div>
+                                            <span class="text-sm font-medium text-emerald-600">Recommended</span>
+                                        </div>
+                                        <div class="grid grid-cols-3 gap-2 mt-2 text-xs">
+                                            <div>
+                                                <div class="text-gray-500">Cost</div>
+                                                <div class="font-bold">$1,245</div>
+                                            </div>
+                                            <div>
+                                                <div class="text-gray-500">Time</div>
+                                                <div class="font-bold">18h 32m</div>
+                                            </div>
+                                            <div>
+                                                <div class="text-gray-500">CO₂</div>
+                                                <div class="font-bold">324kg</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="route-option p-3 rounded-lg border border-gray-200">
+                                        <div class="flex justify-between items-center">
+                                            <div class="flex items-center">
+                                                <div class="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
+                                                <span class="font-medium">Fastest Route</span>
+                                            </div>
+                                        </div>
+                                        <div class="grid grid-cols-3 gap-2 mt-2 text-xs">
+                                            <div>
+                                                <div class="text-gray-500">Cost</div>
+                                                <div class="font-bold">$1,780</div>
+                                            </div>
+                                            <div>
+                                                <div class="text-gray-500">Time</div>
+                                                <div class="font-bold">14h 12m</div>
+                                            </div>
+                                            <div>
+                                                <div class="text-gray-500">CO₂</div>
+                                                <div class="font-bold">412kg</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="route-option p-3 rounded-lg border border-gray-200">
+                                        <div class="flex justify-between items-center">
+                                            <div class="flex items-center">
+                                                <div class="w-3 h-3 rounded-full bg-purple-500 mr-2"></div>
+                                                <span class="font-medium">Eco Route</span>
+                                            </div>
+                                        </div>
+                                        <div class="grid grid-cols-3 gap-2 mt-2 text-xs">
+                                            <div>
+                                                <div class="text-gray-500">Cost</div>
+                                                <div class="font-bold">$1,120</div>
+                                            </div>
+                                            <div>
+                                                <div class="text-gray-500">Time</div>
+                                                <div class="font-bold">22h 45m</div>
+                                            </div>
+                                            <div>
+                                                <div class="text-gray-500">CO₂</div>
+                                                <div class="font-bold">278kg</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button
+                                class="w-full py-3 rounded-lg bg-gradient-to-r from-emerald-500 to-blue-500 text-white font-medium hover:from-emerald-600 hover:to-blue-600 transition-all">
+                                Confirm Route Selection
+                            </button>
+                        </div>
+                    </div>
+            </div>
+
+            <div class="mt-12 card-3d p-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">Recent Blockchain Transactions</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Transaction ID</th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Product</th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Location</th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Status</th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200" id="transactionTable">
+                            <!-- Transactions will be added here by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Blockchain Blocks Section -->
+    <section class="py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-6 text-center">Latest Blockchain Blocks</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="blockchainBlocks">
+                <!-- Blocks will be added here by JavaScript -->
+            </div>
+
+            <!-- Fun 3D Blockchain Bot -->
+            <div class="mt-12 flex flex-col items-center">
+                <div class="blockchain-bot">
+                    <div class="bot-head">
+                        <div class="bot-eye left"></div>
+                        <div class="bot-eye right"></div>
+                    </div>
+                    <div class="bot-body"></div>
+                    <div class="bot-arm left"></div>
+                    <div class="bot-arm right"></div>
+                    <div class="bot-leg left"></div>
+                    <div class="bot-leg right"></div>
+                </div>
+                <p class="mt-4 text-gray-600 text-center max-w-md">Meet Blocky, our blockchain guardian! He verifies all
+                    transactions and keeps your supply chain data secure.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">What Our Clients Say</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">Trusted by supply chain leaders across industries</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="card-3d p-8">
+                    <div class="flex items-center mb-4">
+                        <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                    </div>
+                    <p class="text-gray-600 mb-6">"Tracely has transformed our supply chain visibility. The
+                        blockchain integration gives us and our customers complete confidence in product provenance."
+                    </p>
+                    <div class="flex items-center">
+                        <img class="h-10 w-10 rounded-full" src="https://randomuser.me/api/portraits/women/32.jpg"
+                            alt="">
+                        <div class="ml-3">
+                            <div class="font-medium text-gray-800">Sarah Johnson</div>
+                            <div class="text-sm text-gray-500">Supply Chain Director, RetailCo</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-3d p-8">
+                    <div class="flex items-center mb-4">
+                        <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                    </div>
+                    <p class="text-gray-600 mb-6">"The route optimization has saved us 18% in logistics costs while
+                        reducing our carbon footprint. The blockchain integration was seamless."</p>
+                    <div class="flex items-center">
+                        <img class="h-10 w-10 rounded-full" src="https://randomuser.me/api/portraits/men/54.jpg" alt="">
+                        <div class="ml-3">
+                            <div class="font-medium text-gray-800">Michael Chen</div>
+                            <div class="text-sm text-gray-500">Logistics Manager, GlobalGoods</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-3d p-8">
+                    <div class="flex items-center mb-4">
+                        <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        <svg class="h-5 w-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                    </div>
+                    <p class="text-gray-600 mb-6">"Implementing Tracely's blockchain solution helped us achieve
+                        compliance with new regulations while improving operational efficiency."</p>
+                    <div class="flex items-center">
+                        <img class="h-10 w-10 rounded-full" src="https://randomuser.me/api/portraits/women/68.jpg"
+                            alt="">
+                        <div class="ml-3">
+                            <div class="font-medium text-gray-800">Emma Rodriguez</div>
+                            <div class="text-sm text-gray-500">COO, PharmaSecure</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid md:grid-cols-2 gap-12">
+                <div>
+                    <h2 class="text-3xl font-bold text-gray-800 mb-4">Get in Touch</h2>
+                    <p class="text-xl text-gray-600 mb-8">Ready to transform your supply chain? Contact our team to
+                        schedule a demo or learn more about our solutions.</p>
+
+                    <div class="space-y-6">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 mt-1">
+                                <svg class="h-6 w-6 text-emerald-500" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-gray-700 font-medium">Email Us</p>
+                                <p class="text-gray-500">shayansets@gmail.com</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 mt-1">
+                                <svg class="h-6 w-6 text-emerald-500" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-gray-700 font-medium">Call Us</p>
+                                <p class="text-gray-500">+91 6290951425</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 mt-1">
+                                <svg class="h-6 w-6 text-emerald-500" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-gray-700 font-medium">Visit Us</p>
+                                <p class="text-gray-500">Kolkata, India</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8">
+                        <h3 class="text-lg font-medium text-gray-800 mb-4">Follow Us</h3>
+                        <div class="flex space-x-4">
+                            <a href="#" class="text-gray-500 hover:text-emerald-500 transition">
+                                <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />
+                                </svg>
+                            </a>
+                            <a href="#" class="text-gray-500 hover:text-emerald-500 transition">
+                                <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                                    <path fill-rule="evenodd"
+                                        d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                            </a>
+                            <a href="#" class="text-gray-500 hover:text-emerald-500 transition">
+                                <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" />
+                                </svg>
+                            </a>
+                            <a href="#" class="text-gray-500 hover:text-emerald-500 transition">
+                                <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                                    <path fill-rule="evenodd"
+                                        d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 010-5 2.5 2.5 0 010 5z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-3d p-8">
+                    <h3 class="text-xl font-bold text-gray-800 mb-6">Send Us a Message</h3>
+                    <form id="contactForm" class="space-y-6">
+                        <div>
+                            <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                            <input type="text" id="name" name="name"
+                                class="w-full px-4 py-3 rounded-lg input-glass focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                                required>
+                        </div>
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <input type="email" id="email" name="email"
+                                class="w-full px-4 py-3 rounded-lg input-glass focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                                required>
+                        </div>
+                        <div>
+                            <label for="company" class="block text-sm font-medium text-gray-700 mb-1">Company</label>
+                            <input type="text" id="company" name="company"
+                                class="w-full px-4 py-3 rounded-lg input-glass focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label for="message" class="block text-sm font-medium text-gray-700 mb-1">Message</label>
+                            <textarea id="message" name="message" rows="4"
+                                class="w-full px-4 py-3 rounded-lg input-glass focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                                required></textarea>
+                        </div>
+                        <div>
+                            <button type="submit"
+                                class="w-full py-3 rounded-lg bg-gradient-to-r from-emerald-500 to-blue-500 text-white font-medium hover:from-emerald-600 hover:to-blue-600 transition-all">
+                                Send Message
+                            </button>
+                        </div>
+                    </form>
+                    <div id="formSuccess" class="hidden mt-4 p-4 bg-emerald-50 text-emerald-700 rounded-lg">
+                        Thank you for your message! We'll get back to you soon.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 bg-gradient-to-r from-emerald-500 to-blue-500 text-white">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-3xl font-bold mb-6">Ready to Transform Your Supply Chain?</h2>
+            <p class="text-xl mb-8 opacity-90">Join the future of transparent, optimized logistics with Tracely's
+                blockchain-powered platform.</p>
+            <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+                <button
+                    class="px-8 py-3 rounded-full text-emerald-600 bg-white hover:bg-gray-100 font-medium shadow-lg hover:shadow-xl transition-all">
+                    Request Demo
+                </button>
+                <button
+                    class="px-8 py-3 rounded-full text-white border-2 border-white hover:bg-white hover:bg-opacity-10 font-medium shadow-lg hover:shadow-xl transition-all">
+                    Documentation
+                </button>
+            </div>
+
+            <!-- Fun Crypto Miner Animation -->
+            <div class="mt-12 flex justify-center">
+                <div class="crypto-miner">
+                    <div class="miner-body"></div>
+                    <div class="miner-light"></div>
+                    <div class="miner-pick"></div>
+                </div>
+            </div>
+            <p class="mt-4 text-sm opacity-80">Our miners are working hard to secure your supply chain data!</p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 px-6 bg-gray-900 text-gray-300">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row justify-between">
+                <div class="mb-8 md:mb-0">
+                    <div class="flex items-center mb-4">
+                        <svg class="h-8 w-8 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                        <span class="ml-2 text-xl font-bold text-white">Tracely</span>
+                    </div>
+                    <p class="max-w-xs">The premier blockchain traceability platform with intelligent route
+                        optimization.</p>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-8">
+                    <div>
+                        <h3 class="text-white font-medium mb-4">Product</h3>
+                        <ul class="space-y-2">
+                            <li><a href="#" class="hover:text-emerald-400 transition">Features</a></li>
+                            <li><a href="#" class="hover:text-emerald-400 transition">Pricing</a></li>
+                            <li><a href="#" class="hover:text-emerald-400 transition">API</a></li>
+                            <li><a href="#" class="hover:text-emerald-400 transition">Integrations</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-white font-medium mb-4">Resources</h3>
+                        <ul class="space-y-2">
+                            <li><a href="#" class="hover:text-emerald-400 transition">Documentation</a></li>
+                            <li><a href="#" class="hover:text-emerald-400 transition">Guides</a></li>
+                            <li><a href="#" class="hover:text-emerald-400 transition">Blog</a></li>
+                            <li><a href="#" class="hover:text-emerald-400 transition">Webinars</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-white font-medium mb-4">Company</h3>
+                        <ul class="space-y-2">
+                            <li><a href="#" class="hover:text-emerald-400 transition">About</a></li>
+                            <li><a href="#" class="hover:text-emerald-400 transition">Careers</a></li>
+                            <li><a href="#" class="hover:text-emerald-400 transition">Contact</a></li>
+                            <li><a href="#" class="hover:text-emerald-400 transition">Partners</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-500 mb-4 md:mb-0">© 2025 Tracely. All rights reserved.</p>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-emerald-400 transition">
+                        <span class="sr-only">Twitter</span>
+                        <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />
+                        </svg>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-emerald-400 transition">
+                        <span class="sr-only">GitHub</span>
+                        <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path fill-rule="evenodd"
+                                d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-emerald-400 transition">
+                        <span class="sr-only">Discord</span>
+                        <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Create floating blockchain particles
+        const particlesContainer = document.getElementById('particles-container');
+        const colors = ['#10b981', '#3b82f6', '#8b5cf6', '#ec4899'];
+
+        for (let i = 0; i < 20; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'blockchain-particle';
+            particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+            particle.style.left = `${Math.random() * 100}%`;
+            particle.style.top = `${30 + Math.random() * 60}%`;
+            particle.style.animationDelay = `${Math.random() * 15}s`;
+            particle.style.animationDuration = `${10 + Math.random() * 10}s`;
+            particlesContainer.appendChild(particle);
+        }
+
+        // Make ship animation responsive
+        function adjustShipAnimation() {
+            const ship = document.querySelector('.blockchain-ship');
+            const containerWidth = document.querySelector('.ship-container').offsetWidth;
+
+            if (containerWidth < 768) {
+                ship.style.animationDuration = '30s';
+            } else {
+                ship.style.animationDuration = '20s';
+            }
+        }
+
+        window.addEventListener('resize', adjustShipAnimation);
+        adjustShipAnimation();
+        // Initialize Three.js particle background
+        document.addEventListener('DOMContentLoaded', function () {
+            // Particle Background
+            const bgContainer = document.getElementById('particle-bg');
+            const width = bgContainer.clientWidth;
+            const height = bgContainer.clientHeight;
+
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ alpha: true });
+            renderer.setSize(width, height);
+            bgContainer.appendChild(renderer.domElement);
+
+            // Create particles
+            const particlesGeometry = new THREE.BufferGeometry();
+            const particlesCount = 500;
+
+            const posArray = new Float32Array(particlesCount * 3);
+            for (let i = 0; i < particlesCount * 3; i++) {
+                posArray[i] = (Math.random() - 0.5) * 10;
+            }
+
+            particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+
+            const particlesMaterial = new THREE.PointsMaterial({
+                size: 0.02,
+                color: 0x10b981,
+                transparent: true,
+                opacity: 0.6
+            });
+
+            const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+            scene.add(particlesMesh);
+
+            camera.position.z = 3;
+
+            // Animation loop
+            function animate() {
+                requestAnimationFrame(animate);
+
+                particlesMesh.rotation.x += 0.0005;
+                particlesMesh.rotation.y += 0.0005;
+
+                renderer.render(scene, camera);
+            }
+
+            animate();
+
+            // Blockchain Visualization
+            const blockchainVis = document.getElementById('blockchainVisualization');
+            const nodes = [];
+            const connections = [];
+
+            // Create blockchain nodes
+            for (let i = 0; i < 15; i++) {
+                const node = document.createElement('div');
+                node.className = 'blockchain-node';
+                node.style.left = `${Math.random() * 90 + 5}%`;
+                node.style.top = `${Math.random() * 90 + 5}%`;
+                blockchainVis.appendChild(node);
+                nodes.push(node);
+            }
+
+            // Create connections between nodes
+            nodes.forEach((node, index) => {
+                // Connect to next node
+                if (index < nodes.length - 1) {
+                    createConnection(node, nodes[index + 1]);
+                }
+                // Random additional connections
+                if (Math.random() > 0.7 && index < nodes.length - 2) {
+                    createConnection(node, nodes[index + 2]);
+                }
+            });
+
+            function createConnection(node1, node2) {
+                const rect1 = node1.getBoundingClientRect();
+                const rect2 = node2.getBoundingClientRect();
+
+                const x1 = rect1.left + rect1.width / 2 - blockchainVis.getBoundingClientRect().left;
+                const y1 = rect1.top + rect1.height / 2 - blockchainVis.getBoundingClientRect().top;
+                const x2 = rect2.left + rect2.width / 2 - blockchainVis.getBoundingClientRect().left;
+                const y2 = rect2.top + rect2.height / 2 - blockchainVis.getBoundingClientRect().top;
+
+                const length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+                const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+
+                const connection = document.createElement('div');
+                connection.className = 'blockchain-connection';
+                connection.style.width = `${length}px`;
+                connection.style.transform = `rotate(${angle}deg)`;
+                connection.style.left = `${x1}px`;
+                connection.style.top = `${y1}px`;
+
+                blockchainVis.appendChild(connection);
+                connections.push(connection);
+            }
+
+            // Create supply chain connections
+            const supplyChainVis = document.querySelector('.supply-chain-vis');
+            const chainNodes = document.querySelectorAll('.chain-node');
+
+            chainNodes.forEach((node, index) => {
+                if (index < chainNodes.length - 1) {
+                    createChainLink(node, chainNodes[index + 1]);
+                }
+            });
+
+            function createChainLink(node1, node2) {
+                const rect1 = node1.getBoundingClientRect();
+                const rect2 = node2.getBoundingClientRect();
+                const visRect = supplyChainVis.getBoundingClientRect();
+
+                const x1 = rect1.left + rect1.width / 2 - visRect.left;
+                const y1 = rect1.top + rect1.height / 2 - visRect.top;
+                const x2 = rect2.left + rect2.width / 2 - visRect.left;
+                const y2 = rect2.top + rect2.height / 2 - visRect.top;
+
+                const length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+                const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+
+                const link = document.createElement('div');
+                link.className = 'chain-link';
+                link.style.width = `${length}px`;
+                link.style.transform = `rotate(${angle}deg)`;
+                link.style.left = `${x1}px`;
+                link.style.top = `${y1}px`;
+
+                supplyChainVis.appendChild(link);
+            }
+
+            // Animate stats counters
+            function animateCounter(elementId, target, duration = 2000) {
+                const element = document.getElementById(elementId);
+                const start = 0;
+                const increment = target / (duration / 16);
+                let current = start;
+
+                const timer = setInterval(() => {
+                    current += increment;
+                    if (current >= target) {
+                        clearInterval(timer);
+                        current = target;
+                    }
+                    element.textContent = Math.floor(current).toLocaleString();
+                }, 16);
+            }
+
+            // Start counters when stats section is visible
+            const statsSection = document.querySelector('section.bg-gradient-to-r');
+            const observer = new IntersectionObserver((entries) => {
+                if (entries[0].isIntersecting) {
+                    animateCounter('transactionsCount', 1245873);
+                    animateCounter('productsTracked', 84256);
+                    animateCounter('routeOptimized', 18742);
+                    animateCounter('co2Saved', 4287);
+                    observer.unobserve(statsSection);
+                }
+            }, { threshold: 0.5 });
+
+            observer.observe(statsSection);
+
+            // Generate recent transactions
+            const transactionTable = document.getElementById('transactionTable');
+            const products = ['Electronics', 'Pharmaceuticals', 'Food', 'Apparel', 'Automotive'];
+            const locations = ['Shanghai', 'Los Angeles', 'Rotterdam', 'Dubai', 'Singapore'];
+            const statuses = ['In Transit', 'At Warehouse', 'Customs Clearance', 'Delivered'];
+
+            for (let i = 0; i < 5; i++) {
+                const tr = document.createElement('tr');
+                tr.className = 'transaction-item';
+
+                const idTd = document.createElement('td');
+                idTd.className = 'px-6 py-4 whitespace-nowrap text-sm font-mono text-emerald-500';
+                idTd.textContent = `TC-${Math.floor(1000 + Math.random() * 9000)}`;
+
+                const productTd = document.createElement('td');
+                productTd.className = 'px-6 py-4 whitespace-nowrap text-sm text-gray-700';
+                productTd.textContent = products[Math.floor(Math.random() * products.length)];
+
+                const locationTd = document.createElement('td');
+                locationTd.className = 'px-6 py-4 whitespace-nowrap text-sm text-gray-700';
+                locationTd.textContent = locations[Math.floor(Math.random() * locations.length)];
+
+                const statusTd = document.createElement('td');
+                statusTd.className = 'px-6 py-4 whitespace-nowrap';
+                const statusSpan = document.createElement('span');
+                statusSpan.className = 'px-2 py-1 text-xs font-medium rounded-full';
+                const status = statuses[Math.floor(Math.random() * statuses.length)];
+                statusSpan.textContent = status;
+
+                if (status === 'In Transit') {
+                    statusSpan.classList.add('bg-blue-100', 'text-blue-800');
+                } else if (status === 'At Warehouse') {
+                    statusSpan.classList.add('bg-yellow-100', 'text-yellow-800');
+                } else if (status === 'Customs Clearance') {
+                    statusSpan.classList.add('bg-purple-100', 'text-purple-800');
+                } else {
+                    statusSpan.classList.add('bg-green-100', 'text-green-800');
+                }
+
+                statusTd.appendChild(statusSpan);
+
+                const timeTd = document.createElement('td');
+                timeTd.className = 'px-6 py-4 whitespace-nowrap text-sm text-gray-500';
+
+                const hours = Math.floor(Math.random() * 24);
+                const minutes = Math.floor(Math.random() * 60);
+                const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+                timeTd.textContent = `${new Date().toLocaleDateString()} ${timeString}`;
+
+                tr.appendChild(idTd);
+                tr.appendChild(productTd);
+                tr.appendChild(locationTd);
+                tr.appendChild(statusTd);
+                tr.appendChild(timeTd);
+
+                transactionTable.appendChild(tr);
+            }
+
+            // Generate blockchain blocks
+            const blockchainBlocks = document.getElementById('blockchainBlocks');
+            for (let i = 0; i < 4; i++) {
+                const block = document.createElement('div');
+                block.className = 'blockchain-block bg-white p-4 rounded-lg shadow-md block-animate';
+                block.style.animationDelay = `${i * 0.1}s`;
+
+                const blockHeader = document.createElement('div');
+                blockHeader.className = 'flex justify-between items-center mb-2';
+
+                const blockNumber = document.createElement('div');
+                blockNumber.className = 'text-xs font-mono text-emerald-500';
+                blockNumber.textContent = `Block #${Math.floor(10000 + Math.random() * 90000)}`;
+
+                const blockTime = document.createElement('div');
+                blockTime.className = 'text-xs text-gray-500';
+                blockTime.textContent = `${Math.floor(1 + Math.random() * 60)} min ago`;
+
+                blockHeader.appendChild(blockNumber);
+                blockHeader.appendChild(blockTime);
+
+                const blockHash = document.createElement('div');
+                blockHash.className = 'text-xs font-mono text-gray-700 mb-2 truncate';
+                blockHash.textContent = `0x${Math.random().toString(16).substr(2, 64)}`;
+
+                const blockTransactions = document.createElement('div');
+                blockTransactions.className = 'text-xs text-gray-500';
+                blockTransactions.textContent = `${Math.floor(1 + Math.random() * 15)} transactions`;
+
+                block.appendChild(blockHeader);
+                block.appendChild(blockHash);
+                block.appendChild(blockTransactions);
+
+                blockchainBlocks.appendChild(block);
+            }
+
+            // Route option selection
+            document.querySelectorAll('.route-option').forEach(option => {
+                option.addEventListener('click', function () {
+                    document.querySelectorAll('.route-option').forEach(opt => {
+                        opt.classList.remove('active');
+                        opt.classList.remove('border-emerald-500');
+                        opt.classList.remove('bg-emerald-50');
+                    });
+                    this.classList.add('active');
+                    this.classList.add('border-emerald-500');
+                    this.classList.add('bg-emerald-50');
+                });
+            });
+
+            // Contact form submission
+            const contactForm = document.getElementById('contactForm');
+            const formSuccess = document.getElementById('formSuccess');
+
+            contactForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                // Here you would typically send the form data to your server
+                // For demo purposes, we'll just show the success message
+                contactForm.reset();
+                formSuccess.classList.remove('hidden');
+                setTimeout(() => {
+                    formSuccess.classList.add('hidden');
+                }, 5000);
+            });
+
+            // Connect wallet buttons
+            const connectWalletBtn = document.getElementById('connectWalletBtn');
+            const connectWalletBtnMobile = document.getElementById('connectWalletBtnMobile');
+
+            function connectWallet(btn) {
+                btn.textContent = 'Connected';
+                btn.classList.remove('from-emerald-500', 'to-blue-500');
+                btn.classList.add('from-emerald-600', 'to-blue-600');
+            }
+
+            connectWalletBtn.addEventListener('click', () => connectWallet(connectWalletBtn));
+            connectWalletBtnMobile.addEventListener('click', () => connectWallet(connectWalletBtnMobile));
+
+            // Mobile menu toggle
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const mobileMenu = document.getElementById('mobileMenu');
+
+            mobileMenuBtn.addEventListener('click', function () {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // Simple map implementation (would be replaced with actual map library like Leaflet or Google Maps in production)
+            const routeMap = document.getElementById('routeMap');
+            routeMap.innerHTML = `
+                <div style="width:100%;height:100%;background:#e0f2fe;display:flex;justify-content:center;align-items:center;">
+                    <div style="position:relative;width:80%;height:80%;">
+                        <div style="position:absolute;width:100%;height:100%;background:url('https://maps.googleapis.com/maps/api/staticmap?center=37.7749,-122.4194&zoom=12&size=800x400&maptype=roadmap&key=YOUR_API_KEY') center/cover;"></div>
+                        <div style="position:absolute;top:30%;left:20%;width:12px;height:12px;background:#10b981;border-radius:50%;box-shadow:0 0 0 4px rgba(16,185,129,0.3);"></div>
+                        <div style="position:absolute;top:60%;left:70%;width:12px;height:12px;background:#3b82f6;border-radius:50%;box-shadow:0 0 0 4px rgba(59,130,246,0.3);"></div>
+                        <svg style="position:absolute;width:100%;height:100%;top:0;left:0;" viewBox="0 0 100 100" preserveAspectRatio="none">
+                            <path class="route-path" d="M20,30 Q50,40 70,60" stroke="#10b981" stroke-width="1" fill="none" />
+                        </svg>
+                    </div>
+                </div>
+            `;
+
+            // GSAP animations
+            gsap.from("nav", {
+                duration: 1,
+                y: -50,
+                opacity: 0,
+                ease: "power3.out"
+            });
+
+            gsap.from(".card-3d", {
+                duration: 1.5,
+                y: 50,
+                opacity: 0,
+                stagger: 0.2,
+                ease: "back.out(1.7)"
+            });
+
+            gsap.from("section h2, section p", {
+                duration: 1,
+                y: 20,
+                opacity: 0,
+                stagger: 0.1,
+                ease: "power3.out"
+            });
+
+            // Scroll animations
+            const controller = new ScrollMagic.Controller();
+
+            document.querySelectorAll('.card-3d').forEach((card, index) => {
+                new ScrollMagic.Scene({
+                    triggerElement: card,
+                    triggerHook: 0.8,
+                    reverse: false
+                })
+                    .setTween(gsap.from(card, { y: 50, opacity: 0, duration: 0.5 }))
+                    .addTo(controller);
+            });
+        });
+    </script>
+</body>
+
+</html>
