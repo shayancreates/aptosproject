@@ -41,6 +41,9 @@ A decentralized supply chain management system built on Aptos blockchain with Re
    TWILIO_ACCOUNT_SID=your_twilio_account_sid
    TWILIO_AUTH_TOKEN=your_twilio_auth_token
    TWILIO_PHONE_NUMBER=whatsapp:+14155238886
+   GOOGLE_API_KEY=google-gemini-api-key
+   NEXT_PUBLIC_MODULE_ADDRESS=0x5aa3600cea34f3bcfff601685047b12a8597ed47e05d5fd165c1b40c5cca573e
+
    ```
 
 4. **Deploy the Move contract**
