@@ -12,6 +12,12 @@ A decentralized supply chain management system built on Aptos blockchain with Re
 - **Reputation System**: Track supplier performance and ratings
 - **Real-time Updates**: Live data from blockchain
 
+smart contract deployed: 0x5aa3600cea34f3bcfff601685047b12a8597ed47e05d5fd165c1b40c5cca573e
+
+its on testnet
+
+petra wallet is used
+
 ## Prerequisites
 
 - Node.js 18+ and npm
@@ -25,7 +31,7 @@ A decentralized supply chain management system built on Aptos blockchain with Re
 
    ```bash
    git clone <repository-url>
-   cd aptos-project
+   cd aptosproject
    ```
 
 2. **Install dependencies**
@@ -46,20 +52,16 @@ A decentralized supply chain management system built on Aptos blockchain with Re
 
    ```
 
-4. **Deploy the Move contract**
+4. **Deploy the Move contract if needed**
 
    ```bash
    cd contracts
    aptos init --profile default
-   aptos move compile
+   aptos move compile --named-addresses supply_chain=default
    aptos move publish --named-addresses supply_chain=default
    ```
 
-5. **Update the module address**
-   After deployment, copy the module address and update it in `src/app/lib/constants.ts`:
-   ```typescript
-   export const MODULE_ADDRESS = "your_deployed_module_address";
-   ```
+
 
 ## Running the Application
 
@@ -164,27 +166,7 @@ A decentralized supply chain management system built on Aptos blockchain with Re
 - `get_all_orders()`: Get all orders for a user
 - `get_batch_events()`: Get events for a specific batch
 
-## Project Structure
 
-```
-aptos-project/
-├── contracts/                 # Move smart contracts
-│   ├── sources/
-│   │   └── supply_chain.move
-│   └── Move.toml
-├── src/
-│   └── app/
-│       ├── components/        # React components
-│       ├── context/          # React context providers
-│       ├── hooks/            # Custom React hooks
-│       ├── lib/              # Utilities and constants
-│       ├── api/              # API routes
-│       ├── supplier/         # Supplier dashboard
-│       ├── user/             # User dashboard
-│       └── page.tsx          # Main page
-├── public/                   # Static assets
-└── README.md
-```
 
 ## Troubleshooting
 
@@ -195,33 +177,15 @@ aptos-project/
    - Make sure to initialize your account before creating batches
    - Check if the module address is correct
 
-2. **429 Rate Limit Error**
 
-   - The application uses a reliable testnet endpoint
-   - If you encounter rate limits, wait a moment and try again
-
-3. **WhatsApp Notifications Not Working**
+2. **WhatsApp Notifications Not Working**
 
    - Verify Twilio credentials in environment variables
    - Check if the phone number format is correct (+country code)
    - Ensure the user has joined the Twilio WhatsApp sandbox
 
-4. **Wallet Connection Issues**
+3. **Wallet Connection Issues**
    - Make sure you're using a compatible Aptos wallet
    - Check if you're connected to the correct network (Testnet)
 
-### Development Tips
-
-1. **Testing with Multiple Wallets**
-
-   - Use different wallet accounts to test supplier and user roles
-   - Create test batches with one account and order with another
-
-2. **Blockchain Transactions**
-
-   - All transactions require wallet approval
-   - Check the console for transaction hashes and status
-
-3. **Data Refresh**
-   - Use the refresh button to update data from the blockchain
-   - Data is fetched automatically when switching accounts
+##
